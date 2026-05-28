@@ -1,0 +1,22 @@
+name: bioage
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - pyarrow            # parquet
+  - pyyaml             # config.yaml
+  - joblib             # 模型 bundle
+  - matplotlib         # forest / KM 图
+  - xgboost
+  - lightgbm           # miceforest 后端
+  - pytorch            # DNN
+  - cpuonly            # 不装 CUDA（如服务器没 GPU；有 GPU 改成 pytorch-cuda=12.1）
+  - lifelines          # Cox / KM / C-index
+  - optuna             # 调参
+  - miceforest>=6.0    # MICE (5.x API 不同)
+  - tqdm

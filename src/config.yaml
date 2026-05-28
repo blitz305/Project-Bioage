@@ -1,0 +1,552 @@
+# 53 个 ML 输入特征 + 元数据
+# 来源：PhenoAge (10) ∪ SDOHAge_Final_Inputs (51)
+# 详见 指导文件/markdown/feature_dictionary.md
+
+paths:
+  raw_csv: "../指标csv文件/downloads/整合指标.csv"
+  data_dir: "../data"
+  outputs_dir: "../outputs"
+
+# baseline instance
+instance: 0
+
+# 性别字段（UKB Field 31: 0=Female, 1=Male）
+sex_col: "p31"
+
+# chronological age — 既是特征，也用作残差化的协变量
+age_col: "p21022"
+age_field_id: 21022
+
+# 缺失率阈值
+# - 列阈值设为 1.0 = 不剔除任何特征列，全部交给 MICE 插补
+# - 行阈值 0.15 = 按 SDOHAge 原文，剔除单样本缺失率 > 15% 的参与者
+max_col_missing_rate: 1.0
+max_row_missing_rate: 0.15
+
+# UKB 特殊编码 → NA
+# -1 Do not know, -3 Prefer not to answer, -7 None of the above（看字段单独处理）
+generic_na_codes: [-1, -3]
+
+# 多重插补
+# v1: sklearn IterativeImputer (供 PhenoAge 公式用，仍保留)
+# v2: miceforest 全局一次性插补 (impute_v2.py)，每性别在 train 区 fit 一次
+imputation:
+  method: "mice"           # sklearn IterativeImputer (v1)
+  max_iter: 10
+  random_state: 42
+  v2_strategy: "global_once"  # v2 用 miceforest，age 排除，train 区 fit，apply 到 train+test
+
+# 标准化
+standardize: true
+
+# === 53 个特征清单 ===
+features:
+
+  # ---------- 体测/生化 (42) ----------
+  - name: BMI
+    field_id: 21001
+    raw_cols: ["p21001_i0"]
+    aggregate: first
+    unit: "kg/m2"
+    transform: zscore
+
+  - name: DBP
+    field_id: 4079
+    raw_cols: ["p4079_i0_a0", "p4079_i0_a1"]
+    aggregate: mean
+    unit: "mmHg"
+    transform: zscore
+
+  - name: SBP
+    field_id: 4080
+    raw_cols: ["p4080_i0_a0", "p4080_i0_a1"]
+    aggregate: mean
+    unit: "mmHg"
+    transform: zscore
+
+  - name: FEV1
+    field_id: 3063
+    raw_cols: ["p3063_i0_a0", "p3063_i0_a1", "p3063_i0_a2"]
+    aggregate: max
+    unit: "L"
+    transform: zscore
+
+  - name: WBC
+    field_id: 30000
+    raw_cols: ["p30000_i0"]
+    aggregate: first
+    unit: "10^9/L"
+    transform: zscore
+
+  - name: RBC
+    field_id: 30010
+    raw_cols: ["p30010_i0"]
+    aggregate: first
+    unit: "10^12/L"
+    transform: zscore
+
+  - name: Haemoglobin
+    field_id: 30020
+    raw_cols: ["p30020_i0"]
+    aggregate: first
+    unit: "g/dL"
+    transform: zscore
+
+  - name: MCV
+    field_id: 30040
+    raw_cols: ["p30040_i0"]
+    aggregate: first
+    unit: "fL"
+    transform: zscore
+
+  - name: RDW
+    field_id: 30070
+    raw_cols: ["p30070_i0"]
+    aggregate: first
+    unit: "%"
+    transform: zscore
+
+  - name: Platelet_count
+    field_id: 30080
+    raw_cols: ["p30080_i0"]
+    aggregate: first
+    unit: "10^9/L"
+    transform: zscore
+
+  - name: Platelet_crit
+    field_id: 30090
+    raw_cols: ["p30090_i0"]
+    aggregate: first
+    unit: "%"
+    transform: zscore
+
+  - name: Neutrophill_count
+    field_id: 30140
+    raw_cols: ["p30140_i0"]
+    aggregate: first
+    unit: "10^9/L"
+    transform: zscore
+
+  - name: Lymphocyte_pct
+    field_id: 30180
+    raw_cols: ["p30180_i0"]
+    aggregate: first
+    unit: "%"
+    transform: zscore
+
+  - name: Monocyte_pct
+    field_id: 30190
+    raw_cols: ["p30190_i0"]
+    aggregate: first
+    unit: "%"
+    transform: zscore
+
+  - name: Mean_sphered_cell_volume
+    field_id: 30270
+    raw_cols: ["p30270_i0"]
+    aggregate: first
+    unit: "fL"
+    transform: zscore
+
+  - name: Urine_creatinine
+    field_id: 30510
+    raw_cols: ["p30510_i0"]
+    aggregate: first
+    unit: "umol/L"
+    transform: zscore
+
+  - name: Urine_potassium
+    field_id: 30520
+    raw_cols: ["p30520_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: Urine_sodium
+    field_id: 30530
+    raw_cols: ["p30530_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: Albumin
+    field_id: 30600
+    raw_cols: ["p30600_i0"]
+    aggregate: first
+    unit: "g/L"
+    transform: zscore
+
+  - name: ALP
+    field_id: 30610
+    raw_cols: ["p30610_i0"]
+    aggregate: first
+    unit: "U/L"
+    transform: zscore
+
+  - name: ALT
+    field_id: 30620
+    raw_cols: ["p30620_i0"]
+    aggregate: first
+    unit: "U/L"
+    transform: zscore
+
+  - name: ApolipoproteinA
+    field_id: 30630
+    raw_cols: ["p30630_i0"]
+    aggregate: first
+    unit: "g/L"
+    transform: zscore
+
+  - name: AST
+    field_id: 30650
+    raw_cols: ["p30650_i0"]
+    aggregate: first
+    unit: "U/L"
+    transform: zscore
+
+  - name: Direct_bilirubin
+    field_id: 30660
+    raw_cols: ["p30660_i0"]
+    aggregate: first
+    unit: "umol/L"
+    transform: zscore
+    note: "缺失率 ~21%，列保留，由 MICE 插补"
+
+  - name: Urea
+    field_id: 30670
+    raw_cols: ["p30670_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: Calcium
+    field_id: 30680
+    raw_cols: ["p30680_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: Cholesterol
+    field_id: 30690
+    raw_cols: ["p30690_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: Creatinine
+    field_id: 30700
+    raw_cols: ["p30700_i0"]
+    aggregate: first
+    unit: "umol/L"
+    transform: zscore
+
+  - name: CRP
+    field_id: 30710
+    raw_cols: ["p30710_i0"]
+    aggregate: first
+    unit: "mg/L"
+    transform: zscore
+    note: "原值列；同时另起 lnCRP 列做 ln 变换以兼容 PhenoAge 公式"
+
+  - name: lnCRP
+    field_id: 30710
+    raw_cols: ["p30710_i0"]
+    aggregate: first
+    unit: "ln(mg/L)"
+    transform: log_then_zscore
+
+  - name: CystatinC
+    field_id: 30720
+    raw_cols: ["p30720_i0"]
+    aggregate: first
+    unit: "mg/L"
+    transform: zscore
+
+  - name: GGT
+    field_id: 30730
+    raw_cols: ["p30730_i0"]
+    aggregate: first
+    unit: "U/L"
+    transform: zscore
+
+  - name: Glucose
+    field_id: 30740
+    raw_cols: ["p30740_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: HbA1c
+    field_id: 30750
+    raw_cols: ["p30750_i0"]
+    aggregate: first
+    unit: "mmol/mol"
+    transform: zscore
+
+  - name: IGF1
+    field_id: 30770
+    raw_cols: ["p30770_i0"]
+    aggregate: first
+    unit: "nmol/L"
+    transform: zscore
+
+  - name: LDL_direct
+    field_id: 30780
+    raw_cols: ["p30780_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: Phosphate
+    field_id: 30810
+    raw_cols: ["p30810_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: SHBG
+    field_id: 30830
+    raw_cols: ["p30830_i0"]
+    aggregate: first
+    unit: "nmol/L"
+    transform: zscore
+
+  - name: Total_bilirubin
+    field_id: 30840
+    raw_cols: ["p30840_i0"]
+    aggregate: first
+    unit: "umol/L"
+    transform: zscore
+
+  - name: Testosterone
+    field_id: 30850
+    raw_cols: ["p30850_i0"]
+    aggregate: first
+    unit: "nmol/L"
+    transform: zscore
+
+  - name: Total_protein
+    field_id: 30860
+    raw_cols: ["p30860_i0"]
+    aggregate: first
+    unit: "g/L"
+    transform: zscore
+
+  - name: Triglycerides
+    field_id: 30870
+    raw_cols: ["p30870_i0"]
+    aggregate: first
+    unit: "mmol/L"
+    transform: zscore
+
+  - name: VitaminD
+    field_id: 30890
+    raw_cols: ["p30890_i0"]
+    aggregate: first
+    unit: "nmol/L"
+    transform: zscore
+
+  # ---------- SDOH (10) ----------
+  - name: Townsend
+    field_id: 22189
+    raw_cols: ["p22189"]
+    aggregate: first
+    unit: "index"
+    transform: zscore
+
+  - name: NO2_2007
+    field_id: 24018
+    raw_cols: ["p24018"]
+    aggregate: first
+    unit: "ug/m3"
+    transform: zscore
+
+  - name: PM10_2010
+    field_id: 24005
+    raw_cols: ["p24005"]
+    aggregate: first
+    unit: "ug/m3"
+    transform: zscore
+
+  - name: PM25_2010
+    field_id: 24006
+    raw_cols: ["p24006"]
+    aggregate: first
+    unit: "ug/m3"
+    transform: zscore
+
+  - name: Daytime_noise
+    field_id: 24020
+    raw_cols: ["p24020"]
+    aggregate: first
+    unit: "dB"
+    transform: zscore
+
+  - name: Nighttime_noise
+    field_id: 24022
+    raw_cols: ["p24022"]
+    aggregate: first
+    unit: "dB"
+    transform: zscore
+
+  - name: Education
+    field_id: 6138
+    raw_cols: ["p6138_i0"]
+    aggregate: education_fold
+    unit: "ordinal(0..2)"
+    transform: zscore
+    fold_rule:
+      drop_codes: [-3]               # 视为缺失
+      keep_codes_as_negative: [-7]   # -7 None of the above 视为最低档参与"取最小"
+      pick: min                      # min code = 最高学历
+      mapping:                       # 最终 3 档（int 表示有序）
+        College and above: [1, 5, 6]
+        High school or equivalent: [2]
+        Below high school: [3, 4, -7]
+      ordered_levels:
+        - "Below high school"           # 0
+        - "High school or equivalent"   # 1
+        - "College and above"           # 2
+
+  - name: Household_income
+    field_id: 738
+    raw_cols: ["p738_i0"]
+    aggregate: first
+    unit: "ordinal(1..5)"
+    transform: zscore
+    na_codes: [-1, -3]
+
+  - name: Friend_family_visits
+    field_id: 1031
+    raw_cols: ["p1031_i0"]
+    aggregate: first
+    unit: "ordinal(1..7) reversed"
+    transform: zscore
+    na_codes: [-1, -3]
+    direction_flip: true   # 翻转后大值=社会接触多
+
+  - name: Able_to_confide
+    field_id: 2110
+    raw_cols: ["p2110_i0"]
+    aggregate: first
+    unit: "ordinal(0..5)"
+    transform: zscore
+    na_codes: [-1, -3]
+
+  # ---------- 必带元 (1) ----------
+  - name: Chronological_age
+    field_id: 21022
+    raw_cols: ["p21022"]
+    aggregate: first
+    unit: "years"
+    transform: zscore
+    note: "既是特征，也是 acceleration 残差化的协变量；建模时按需放入 X"
+
+# ===== v2 流程：切分 + 调参 =====
+
+split:
+  test_ratio: 0.20
+  seed: 42
+  stratify_age_bins: 5      # 按 age 五分位分层
+  by_sex: true              # 男女各自独立切分
+
+tuning:
+  n_trials: 30
+  inner_folds: 5
+  outer_folds: 5
+  seed: 42
+  pruner: median            # Optuna MedianPruner，提前砍掉明显差的 trial
+
+  # miceforest（v2.1：impute_v2.py 一次性全局 fit；age 不含）
+  mice:
+    iterations: 5
+    random_state: 42
+
+  # 各模型搜索空间（仅 xgb / dnn 调；lr 用 sklearn 默认）
+  xgb:
+    n_estimators_max: 2000
+    early_stopping_rounds: 50
+    space:
+      max_depth:        {type: int,   low: 3, high: 10}
+      learning_rate:    {type: float, low: 0.01, high: 0.3, log: true}
+      subsample:        {type: float, low: 0.6, high: 1.0}
+      colsample_bytree: {type: float, low: 0.6, high: 1.0}
+      min_child_weight: {type: int,   low: 1, high: 20}
+      reg_alpha:        {type: float, low: 0.001, high: 10, log: true}
+      reg_lambda:       {type: float, low: 0.001, high: 10, log: true}
+
+  dnn:
+    epochs_max: 200
+    patience: 15
+    space:
+      n_layers:      {type: int,   low: 2, high: 4}
+      hidden_dim:    {type: cat,   choices: [64, 128, 256]}
+      dropout:       {type: float, low: 0.0, high: 0.4}
+      learning_rate: {type: float, low: 0.0001, high: 0.01, log: true}
+      weight_decay:  {type: float, low: 0.000001, high: 0.001, log: true}
+      batch_size:    {type: cat,   choices: [256, 512, 1024]}
+
+# ===== v2.2 增量：模块化时钟 + EN + Spearman + GAM =====
+
+# 模块特征 (权威定义在 src/feature_modules.py)；这里仅供参考/文档目的
+modules:
+  metabolic: [BMI, Glucose, HbA1c, Triglycerides, Cholesterol, LDL_direct, ApolipoproteinA]
+  liver:     [ALT, AST, GGT, ALP, Total_bilirubin, Direct_bilirubin, Albumin, Total_protein]
+  kidney:    [Creatinine, Urea, CystatinC, Urine_creatinine, Urine_potassium, Urine_sodium, Calcium, Phosphate]
+  immune:    [WBC, Neutrophill_count, Lymphocyte_pct, Monocyte_pct, Platelet_count, RDW, CRP]
+
+# ElasticNetCV (sklearn 内置 5-fold 选 alpha + l1_ratio，不走 Optuna)
+elastic_net:
+  l1_ratio_candidates: [0.1, 0.5, 0.7, 0.9, 0.95, 1.0]
+  cv: 5
+  n_alphas: 100
+  max_iter: 5000
+  random_state: 42
+
+# Spearman + BH-FDR 预筛报告
+spearman:
+  abs_rho_threshold: 0.1
+  fdr_alpha: 0.05
+
+# GAM 年龄轨迹 (R + mgcv, family=scat())
+gam:
+  n_splines: 20                # k 参数
+  fdr_alpha: 0.01              # 方案 §12 推荐 FDR<0.01 + edf>3
+  edf_threshold: 3.0
+  age_grid_min: 38             # UKB baseline 主体范围
+  age_grid_max: 73
+  age_grid_n: 50
+
+# ===== v2.4 增量：fit-to-death BioAge (EN-Cox + XGB-Cox) =====
+# 直接拟合死亡风险（PhenoAge 范式），Gompertz 反解成年龄单位。小程序后端用。
+cox:
+  drop_died_within_2yr: true           # 沿用 v2.1：基线即将死亡者污染信号
+  outer_folds: 5
+  seed: 42
+  # EN-Cox（sksurv CoxnetSurvivalAnalysis 自带 alpha path + 内部 CV）
+  encox:
+    l1_ratio_candidates: [0.1, 0.5, 0.7, 0.9, 1.0]
+    n_alphas: 100
+    inner_cv: 5
+    max_iter: 100000
+    tol: 1e-7
+  # XGB-Cox（objective=survival:cox，Optuna 15 trials）
+  xgbcox:
+    n_trials: 15
+    inner_folds: 5
+    n_estimators_max: 800
+    early_stopping_rounds: 30
+    space:
+      max_depth:        {type: int,   low: 3, high: 8}
+      learning_rate:    {type: float, low: 0.01, high: 0.3, log: true}
+      subsample:        {type: float, low: 0.6, high: 1.0}
+      colsample_bytree: {type: float, low: 0.6, high: 1.0}
+      min_child_weight: {type: int,   low: 1, high: 20}
+      reg_alpha:        {type: float, low: 0.001, high: 10, log: true}
+      reg_lambda:       {type: float, low: 0.001, high: 10, log: true}
+  # Gompertz 反解参数：UKB train 区按性别独立拟合 mortality_rate(age)=a*exp(b*age)
+  gompertz:
+    age_bin_width: 5                   # 按 5 岁分箱算观测死亡率
+    ref_age: 60                        # 反解锚点
+    fit_age_min: 40                    # 拟合用年龄范围（UKB baseline 集中区）
+    fit_age_max: 73
